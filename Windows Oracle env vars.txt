@@ -1,0 +1,17 @@
+some tips i've found in stack overflow. could be useful:
+
+fix symbolic links:
+
+cd c:\windows\system32
+mklink /d ora112 c:\Oracle\product\11.2.0\dbhome_1
+cd c:\Windows\sysWOW64
+mklink /d ora112 c:\Oracle\product\11.2.0\client_1
+
+PATH=C:\windows\System32\ora112\bin;C:\ProgramData\Oracle\Java\javapath;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\;C:\Program Files\Microsoft SQL Server\100\Tools\Binn\;C:\Program Files\Microsoft SQL Server\100\DTS\Binn\;C:\Program Files (x86)\Microsoft SQL Server\100\Tools\Binn\VSShell\Common7\IDE\;C:\Program Files (x86)\Microsoft Visual Studio 9.0\Common7\IDE\PrivateAssemblies\;C:\Program Files (x86)\Microsoft SQL Server\100\DTS\Binn\;C:\Program Files\Microsoft\Web Platform Installer\;C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET Web Pages\v1.0\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\
+
+ORACLE_HOME=c:\windows\system32\ora112
+Set Registry value HKLM\Software\ORACLE\KEY_OraClient11g_home1\ORACLE_HOME to:
+C:\Windows\System32\ora112
+
+Set Registry value HKLM\Software\Wow6432Node\ORACLE\KEY_OraClient11g_home1\ORACLE_HOME to:
+C:\Windows\System32\ora112 (not C:\Windows\SysWOW64\System32\ora112)

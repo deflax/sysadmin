@@ -1,0 +1,250 @@
+Siebel HOST: SIEBELHOST
+- install telnet
+- install iis
+- install jre-8u71-windows-x64
+
+0. Prepare Siebel Install Image using snic.bat from the zips.
+java -jar snic.jar also works
+
+1. Install 64bit Oracle Database 11g.
+
+global database name:SIEBELDB
+db administrative pass:SiebelDb1password1
+
+The Database Control URL is https://localhost:1158/em
+user: SYS
+connect as: SYSDBA
+
+create tablespaces:
+size 5GB
+
+SBLDATA
+SBLDATA01.DBF
+
+SBLINDX
+SBLINDX01.DBF
+
+
+2. Install 32bit Oracle Database 11g Client
+
+Type: Administrator
+
+Place tnsnames.ora into C:\Oracle\product\11.2.0\client_1\network\admin
+
+tnsnames.ora contents:
+
+SIEBELDB =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = SIEBELDB)
+    )
+  )
+
+
+
+3. Create Users (based on oracle grantusr.sql)
+cmd.exe
+sqlplus sys@siebeldb as sysdba
+
+create role sse_role;
+grant create session to sse_role;
+
+create role tblo_role;
+grant ALTER SESSION, CREATE CLUSTER, CREATE DATABASE LINK, CREATE INDEXTYPE,
+  CREATE OPERATOR, CREATE PROCEDURE, CREATE SEQUENCE, CREATE SESSION,
+  CREATE SYNONYM, CREATE TABLE, CREATE TRIGGER, CREATE TYPE, CREATE VIEW,
+  CREATE DIMENSION, CREATE MATERIALIZED VIEW, QUERY REWRITE, ON COMMIT REFRESH
+to tblo_role;
+
+create user SIEBEL identified by sadmin1password1;
+grant tblo_role to SIEBEL;
+grant sse_role to SIEBEL;
+alter user SIEBEL quota 0 on SYSTEM quota 0 on SYSAUX;
+alter user SIEBEL default tablespace SBLDATA;
+alter user SIEBEL temporary tablespace temp;
+alter user SIEBEL quota unlimited on SBLDATA;
+alter user SIEBEL quota unlimited on SBLINDX;
+
+create user SADMIN identified by sadmin1password1;
+grant sse_role to SADMIN;
+alter user SADMIN default tablespace sbldata;
+alter user SADMIN temporary tablespace temp;
+alter user SADMIN quota unlimited on SBLDATA;
+alter user SADMIN quota unlimited on SBLINDX;
+
+----
+
+4. INSTALL SIEBEL SERVER from Network Image. General Config:
+
+Oracle Home Name: SES_HOME
+Location: c:\Siebel\15.0.0.0.0\ses
+-gateway name server
+-siebel server
+-database configuration utilities
+Program folder name: Siebel Enterprise Server 15.0.0.0.0
+
+5. SIEBEL ENTERPRISE CONFIGURATION
+
+5.1. Install new gateway name
+
+5.2. Install new enterprise in a gateway name server:
+
+Gateway Name server port: 2320
+name server account name: SADMIN
+pass: sadmin1password1
+enterprise name: SBA_82
+
+Siebel File system: C:\Siebel\15.0.0.0.0\ses\gtwysrvr\fs
+database table owner: SIEBEL
+sqlnet connect string: SIEBELDB
+user name: SADMIN
+pass: sadmin1password1
+
+6. DATABASE SERVER CONFIGURATION
+
+Make desktop shortcut to C:\Windows\SysWOW64\odbcad32.exe
+run as admin and get ODBC Data Source Name: SBA_82_DSN
+
+db username: SADMIN
+pass: sadmin1password1
+db table owner: SIEBEL
+pass: sadmin1password1
+
+index tables space name: SBLINDX
+table space name: SBLDATA
+
+Wait 3 hours max.
+
+Check Program Files\Oracle\Inventory\logs for errors
+
+7. SIEBEL SERVER CONFIGURATION
+gateway login: SADMIN
+
+Enable Open UI -> NO.
+Component Groups:
+-CallCenter
+-Remote
+-ORCL
+-WorkFlow
+-Communications
+
+broker port: 2321
+tcp/ip for syncronization manager: 40400
+
+8. SIEBEL ENTERPRISE CONFIGURATION - SWSE Profile
+
+Enterprise Name: SBA_82
+
+Path: C:\Siebel\15.0.0.0.0\ses\gtwysrvr\admin\Webserver
+
+HI Employee User: SIEBANON
+HI pass: siebanon123
+
+SI contact user: SIEBANON
+pass: siebanon123c
+
+token: 615 112 419 907 (spaces are just for readability here)
+statistic page: _stats.swe
+
+http port: 8080
+https port: 8443
+
+9. POPULATE THE FS DIR:
+
+Copy all files from C:\Siebel\15.0.0.0.0\ses\dbsrvr\FILES
+to: C:\Siebel\15.0.0.0.0\ses\gtwysrvr\fs\att
+
+10. INSTALL SIEBEL WEB SERVER EXTENSION
+
+C:\Siebel_Install_Image\15.0.0.0\Windows\Server\Siebel_Web_Server_Extension\Disk1\install
+
+swse seed: 612 451 241 125 121 (again spaces are for readability)
+
+11. Siebel Web Server Extension Configuration
+
+Load balancing: Single Siebel Server
+profile location : C:\Siebel\15.0.0.0.0\ses\gtwysrvr\admin\Webserver
+
+12. Fix Permission
+Go to C:\Siebel\15.0.0.0.0\eappweb
+Right click properties -> sharing -> advanced sharing.
+share this folder.
+
+permissions -> add -> advanced -> find and add:
+IUSR
+IIS_IUSRS
+
+with full permissions.
+
+13. Setup ISS
+
+cmd.exe -> 
+iisreset
+
+14. INSTALL WEB CLIENT:
+
+C:\Siebel_Install_Image\15.0.0.0\Windows\Client\Siebel_Web_Client\Disk1\install
+start setup.bat
+
+name: CLIENT_HOME
+path: C:\Siebel\15.0.0.0.0\Client
+
+select: developer web client
+enable openui: no
+db alias: SIEBELDB
+owner: SIEBEL
+siebel FS: C:\SIEBEL_FS
+gateway addr: SIEBELHOST
+enterprise: SBA_82
+request: SIEBELHOST
+
+15. Install Siebel Tools:
+
+C:\Siebel_Install_Image\15.0.0.0\Windows\Client\Siebel_Tools\Disk1\install
+start setup.bat
+home: TOOLS_HOME
+c:\Siebel\15.0.0.0.0\Tools
+
+db alias: SIEBELDB
+owner: SIEBEL
+siebel FS: C:\SIEBEL_FS
+
+gateway addr: SIEBELHOST
+enterprise: SBA_82
+
+installation spawns C:\Siebel\15.0.0.0.0\Client\PUBLIC\enu\predeploy.htm
+unblock active x on your IE
+
+16. Web Access
+login using the start menu shortcuts is:
+userid: SADMIN
+pass: sadmin1password1
+connect to: Server
+
+add http://siebelhost:8080 to trusted sites
+(http://siebelhost.crm.example.com:8080/start.swe should also be trusted in my case...)
+
+and in internet tools setup low security profile to start activex controls automatically
+
+17. Setup anon user:
+Go to Site map -> Administration User -> Employees
+click New and add:
+
+Last Name: SIEBANON
+First Name: SIEBANON
+User ID: SIEBANON
+
+Position: Siebel Administrator (?)
+Ctrl+S to save.
+
+cmd.exe -> sqlplus sys@siebeldb as sysdba
+
+create user SIEBANON identified by siebanon123;
+
+grant sse_role to SIEBANON;
+
+exit
+
+iisreset

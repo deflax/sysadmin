@@ -1,0 +1,116 @@
+Redundant BGP with 2 ISPs, VRRP and Bird.
+
+/etc/sysctl.conf:
+net.ipv4.conf.all.rp_filter=0
+net.ipv4.conf.lo.rp_filter=0
+net.ipv4.conf.default.rp_filter=0
+net.ipv4.conf.eth1.rp_filter=1
+net.ipv4.ip_forward=1
+net.ipv4.conf.default.forwarding=1
+net.ipv4.conf.all.forwarding=1
+
+my as = 2000
+
+
+      as 321       as2000       as 123
+      
+       ebgp         ibgp         ebgp
+ isp2 ------> RT2 <------> RT1 <------ isp1
+              | .22    .21 |
+       eth0   .    eth1    |    eth0
+              .            |
+                           ^
+                  vrrp .1
+
+                  
+/etc/keepalived/keepalived.conf:
+vrrp_instance VI_1 {
+    state MASTER
+    #state BACKUP #RT2
+    
+    interface eth1 #interconnect
+    virtual_router_id 51
+    
+    priority 100
+    #priority 150 #RT2
+    
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass <CHANGEME>
+    }
+
+    virtual_ipaddress {
+        x.x.x.1 dev eth1
+    }
+
+    #notify /script.sh #misc
+}
+
+
+/etc/bird/bird.conf:
+log syslog { debug, trace, info, remote, warning, error, auth, fatal, bug };
+#log stderr all;
+#log "tmp" all;
+debug protocols all;
+
+# Router ID
+router id x.x.x.21;
+#router id x.x.x.22; #RT2
+
+protocol kernel RT1 {
+        learn;          # Learn all alien routes from the kernel
+        persist;        # Don't remove routes on bird shutdown
+        scan time 0;    # Scan kernel routing table every 20 seconds, 0 disables the scanning and only netlink is used to send/receive kernel routes
+        import all;     # Default is import all
+        export all;     # Default is export none
+        device routes;
+        graceful restart;
+}
+
+protocol device {
+        scan time 60;
+        }
+
+protocol static {
+        route x.x.x.0/24 via x.x.x.1;
+}
+
+# Import all directly connected routes. These come in with RTS_DEVICE
+protocol direct evrdirect {
+        interface "*";
+        export all;
+}
+
+filter bgp_out
+{
+        #dont poison the ISPs with anything else except your prefix     
+        if net = x.x.x.0/24 then accept;
+        else reject;
+}
+
+protocol bgp RT1 {
+        local as 2000;
+        neighbor x.x.x.22 as 2000; # iBGP peering
+        #neighbor x.x.x.x.21 as 2000; on RT2
+        keepalive time 5;
+        graceful restart;
+        import all;
+        export all;
+        preference 50; # highest preference "wins".
+        direct;
+        gateway direct;
+}
+
+protocol bgp MAIN {
+        local as 2000;
+        neighbor y.y.y.y as 123; 
+        #neighbor z.z.z.z as 321; on RT1
+        keepalive time 5;
+        graceful restart;
+        import all;
+        export filter bgp_out;
+        hold time 30;
+        preference 100;
+}
