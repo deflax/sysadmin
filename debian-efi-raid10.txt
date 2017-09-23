@@ -1,3 +1,4 @@
+1. install debian
 #install debian 9 from dvd1 (to support boot from efi)
 
 #create 512M EFI partition, raid10 30G, raid10 rest...
@@ -5,10 +6,7 @@
 #create lvm (1) with vg=vm on md1
 #create lvm swap and root on lvm (0)
 
-apt-get update
-apt-get dist-upgrade
-apt install sudo htop iftop iotop mc nmap bridge-utils vim-nox mtr
-
+2. fix boot
 Modify lines in /etc/default/grub to read:
 #GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
 GRUB_CMDLINE_LINUX=""
@@ -41,3 +39,18 @@ dd if=/dev/sda1 of=/dev/sdb1 ; dd if=/dev/sdb1 of=/dev/sdc1 ; dd if=/dev/sdc1 of
 efibootmgr -c -g -d /dev/sdb -p 1 -L "debian #2" -l '\EFI\debian\grubx64.efi'
 efibootmgr -c -g -d /dev/sdc -p 1 -L "debian #3" -l '\EFI\debian\grubx64.efi'
 efibootmgr -c -g -d /dev/sdd -p 1 -L "debian #4" -l '\EFI\debian\grubx64.efi'
+
+3. install base apps
+apt-get update
+apt-get dist-upgrade
+apt install sudo htop iftop iotop mc nmap bridge-utils vim-nox mtr ntpdate
+
+echo "Europe/Sofia" > /etc/timezone
+cp /usr/share/zoneinfo/Europe/Sofia /etc/localtime
+echo "00 00   * * *   root    ntpdate time.apple.com" >> /etc/crontab
+
+#disable vim mouse
+echo "set mouse=" > /etc/vim/vimrc.local
+echo "let g:skip_defaults_vim = 1" >> /etc/vim/vimrc.local
+
+apt install zabbix-agent
