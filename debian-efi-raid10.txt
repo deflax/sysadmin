@@ -1,0 +1,43 @@
+#install debian 9 from dvd1 (to support boot from efi)
+
+#create 512M EFI partition, raid10 30G, raid10 rest...
+#create lvm (0) with vg=pve on md0
+#create lvm (1) with vg=vm on md1
+#create lvm swap and root on lvm (0)
+
+apt-get update
+apt-get dist-upgrade
+apt install sudo htop iftop iotop mc nmap bridge-utils vim-nox mtr
+
+Modify lines in /etc/default/grub to read:
+#GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX=""
+
+Enter the following code into /usr/share/initramfs-tools/scripts/local-premount/sleepAwhile:
+#!/bin/sh
+echo
+echo "sleeping for 30 seconds while udevd and mdadm settle down"
+sleep 5
+echo "sleeping for 25 seconds while udevd and mdadm settle down"
+sleep 5
+echo "sleeping for 20 seconds while udevd and mdadm settle down"
+sleep 5
+echo "sleeping for 15 seconds while udevd and mdadm settle down"
+sleep 5
+echo "sleeping for 10 seconds while udevd and mdadm settle down"
+sleep 5
+echo "sleeping for 5 seconds while udevd and mdadm settle down"
+sleep 5
+echo "done sleeping"
+
+Make the script executable and install it.
+chmod a+x /usr/share/initramfs-tools/scripts/local-premount/sleepAwhile
+update-grub
+update-initramfs -u
+
+#Clone the EFI partition:
+dd if=/dev/sda1 of=/dev/sdb1 ; dd if=/dev/sdb1 of=/dev/sdc1 ; dd if=/dev/sdc1 of=/dev/sdd1
+
+efibootmgr -c -g -d /dev/sdb -p 1 -L "debian #2" -l '\EFI\debian\grubx64.efi'
+efibootmgr -c -g -d /dev/sdc -p 1 -L "debian #3" -l '\EFI\debian\grubx64.efi'
+efibootmgr -c -g -d /dev/sdd -p 1 -L "debian #4" -l '\EFI\debian\grubx64.efi'
