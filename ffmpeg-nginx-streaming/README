@@ -1,0 +1,6 @@
+1. Install nginx-rtmp from AUR
+2. Replace /etc/nginx/nginx.conf
+3. cd / ; mkdir /HLS ; cd /HLS ; mkdir live
+4. systemctl enable nginx ; sytemctl start nginx
+5. chmod +x desktop-stream.sh
+6. ./desktop-stream.sh
