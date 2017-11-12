@@ -1,6 +1,7 @@
 1. Install nginx-rtmp from AUR
 2. Replace /etc/nginx/nginx.conf
-3. cd / ; mkdir /HLS ; cd /HLS ; mkdir live
-4. systemctl enable nginx ; sytemctl start nginx
-5. chmod +x desktop-stream.sh
-6. ./desktop-stream.sh
+3. cd / ; mkdir /HLS ; cd /HLS ; mkdir live ; mkdir /var/www
+4. Place index.html in /var/www
+5. systemctl enable nginx ; sytemctl start nginx
+6. chmod +x desktop-stream.sh
+7. ./desktop-stream.sh
