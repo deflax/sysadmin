@@ -5,3 +5,4 @@
 5. systemctl enable nginx ; sytemctl start nginx
 6. chmod +x desktop-stream.sh
 7. ./desktop-stream.sh
+8. Test with vlc rtmp://localhost/live
