@@ -1,0 +1,7 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+    Hello World from MyView!
+        <div>
+            <a href="{{ url_for('admin.index') }}">Go to admin!</a>
+        </div>
+{% endblock %}
