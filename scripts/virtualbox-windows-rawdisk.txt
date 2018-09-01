@@ -1,0 +1,16 @@
+how to start linux virtual machine on windows host using raw drives
+
+1. open cmd.exe as administrator
+
+cd "C:\Program Files\Oracle\Virtualbox"
+
+c:\Program Files\Oracle\VirtualBox>VBoxManage.exe internalcommands createrawvmdk -filename "C:\Users\afx\skyblue-disk0.vmdk" -rawdisk \\.\PHYSICALDRIVE0
+RAW host disk access VMDK file C:\Users\afx\skyblue-disk0.vmdk created successfully.
+c:\Program Files\Oracle\VirtualBox>VBoxManage.exe internalcommands createrawvmdk -filename "C:\Users\afx\skyblue-disk1.vmdk" -rawdisk \\.\PHYSICALDRIVE1
+RAW host disk access VMDK file C:\Users\afx\skyblue-disk1.vmdk created successfully.
+
+c:\Program Files\Oracle\VirtualBox>VBoxManage.exe storageattach skyblue --storagectl "SATA" --port 0 --device 0 --type hdd --medium "C:\Users\afx\Documents\skyblue-disk0.vmdk"
+c:\Program Files\Oracle\VirtualBox>VBoxManage.exe storageattach skyblue --storagectl "SATA" --port 1 --device 0 --type hdd --medium "C:\Users\afx\Documents\skyblue-disk1.vmdk"
+
+2. start virtualbox as administrator
+3. done
