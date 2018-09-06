@@ -26,7 +26,7 @@ TIMESTAMP=`date +%F-%H%M`
 mkdir -p "${BACKUPS_DIR}/backup_${TIMESTAMP}"
 for db in $dbs; do
     echo "database backup $db at $TIMESTAMP"
-    $MONGODUMP_PATH --username $MONGO_USER --password $MONGO_PASS --authenticationDatabase admin --host $MONGO_HOST:$MONGO_PORT --db$db --out "${BACKUPS_DIR}/backup_${TIMESTAMP}"
+    $MONGODUMP_PATH --username $MONGO_USER --password $MONGO_PASS --authenticationDatabase admin --host $MONGO_HOST:$MONGO_PORT --db $db --out "${BACKUPS_DIR}/backup_${TIMESTAMP}"
 done
 tar -czvf "${BACKUPS_DIR}/backup_${TIMESTAMP}.tar.gz" "${BACKUPS_DIR}/backup_${TIMESTAMP}"
 rm -fr "${BACKUPS_DIR}/backup_${TIMESTAMP}"
