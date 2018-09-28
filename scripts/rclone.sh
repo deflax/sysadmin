@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-## Example .config/rclone/rclone.conf:
+### Example .config/rclone/rclone.conf:
 #[pcloud]
 #type = pcloud
 #token = {"access_token":"0000","token_type":"bearer","expiry":"0001-01-01T00:00:00Z"}
