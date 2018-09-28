@@ -7,7 +7,7 @@
 
 #[remotecrypto]
 #type = crypt
-#remote = pcloud:encbackup
+#remote = pcloud:/encbackup/
 #filename_encryption = off
 #directory_name_encryption = false
 #password = 0000
@@ -70,7 +70,7 @@ do
 done | awk '{i+=$1} END {print "Total bytes: " i / 1048576 " GB"}'
 
 #cloud sync
-rclone -v -P sync $ENCSRC remotecrypto
+rclone -v -P sync $ENCSRC remotecrypto:/
 
 #cleanup
 rm /tmp/reclist.txt
