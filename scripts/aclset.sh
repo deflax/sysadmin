@@ -5,8 +5,8 @@
 ### vars
 
 watchdir="/srv/share"
-domainadmin="admin"
-password="bangovasil"
+domainadmin="user"
+password="pass"
 
 ###
 
