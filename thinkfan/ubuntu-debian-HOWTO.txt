@@ -1,40 +1,10 @@
-#/etc/thinkfan.conf:
-hwmon /sys/devices/virtual/hwmon/hwmon0/temp1_input
-tp_fan /proc/acpi/ibm/fan
-
-(0,  0, 25)
-(1,  20, 30)
-(2,  25, 31)
-(3,  30, 36)
-(4,  35, 41)
-(5,  40, 47)
-(6,  46, 50)
-(7,  49, 56)
-(126,  55, 32767)
-
-
-#/etc/systemd/system/thinkfan.service
-[Unit]
-Description=simple and lightweight fan control program
-After=syslog.target
-
-[Service]
-Type=forking
-ExecStart=/usr/local/sbin/thinkfan
-PIDFile=/var/run/thinkfan.pid
-ExecReload=/bin/kill -HUP $MAINPID
-
-[Install]
-WantedBy=multi-user.target
-
-
 #INSTALL (as root)
 echo "options thinkpad_acpi fan_control=1" >> /etc/modprobe.d/thinkpad.conf
 reboot
 apt install lm-sensors cmake-curses-gui libyaml-cpp-dev libboost-all-dev
-wget https://github.com/vmatare/thinkfan/archive/0.9.3.tar.gz
-tar xzvf 0.9.3.tar.gz
-cd thinkfan-0.9.3
+wget https://github.com/vmatare/thinkfan/archive/1.2.1.tar.gz
+tar xzvf 1.2.1.tar.gz
+cd thinkfan-1.2.1
 mkdir build; cd build
 cmake -D CMAKE_BUILD_TYPE:STRING=Debug ..
 make
